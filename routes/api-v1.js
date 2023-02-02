@@ -23,12 +23,10 @@ function isIdDigit(req, res, next) {
 //Error handler function
 function errorHandler(res, err) {
     if (err.name == "MongoServerError" && err.code == 11000) {
-        err.errMsg = "Duplicate pokemon"
-        return res.status(400).json(err)
+        return res.status(400).json({errMsg: "Duplicate pokemon"})
     } else if (err.name == "ValidationError"){
-        err.errorMsg = "Invalid data"
-        return res.status(400).json(err)
-    } else return res.status(400).json(err)
+        return res.status(400).json({errMsg: "Invalid pokemon data. " + err})
+    } else return res.status(400).json({errMsg: ""+err})
 
 }
 
@@ -41,14 +39,10 @@ router.get('/repopulate', (req, res) => {
         res.status(201).json(response.data);
     }).catch(error => {
         res.status(400).json({
-            text: "Sorry, I couldn't find any information about that repo."
+            errMsg: "Sorry, I couldn't find any information about that repo."
         });
     });
 })
-
-// Only uncomment next line if repopulating the DB is necessary
-// populateDB()
-
 
 // Routes
 
@@ -62,7 +56,7 @@ router.get('/pokemons', async (req, res) => {
             errMsg: "Pokemon not found"
         })
     } catch (err) {
-        res.status(400).json("Error while finding all pokemons: " + err)
+        return errorHandler(res, err)
     }
 })
 
@@ -76,7 +70,7 @@ router.get('/pokemon/:id', isIdDigit, async (req, res) => {
             errMsg: "Pokemon not found"
         })
     } catch (err) {
-        res.status(400).json("Error while getting Pokemon" + err)
+        return errorHandler(res, err)
     }
 })
 
@@ -112,7 +106,7 @@ router.put('/pokemon/:id', isIdDigit, async (req, res) => {
             errMsg: "Couldn't upsert pokemon"
         })
     } catch (err) {
-        res.status(400).json(`Error while upserting pokemon: ${err}`)
+        return errorHandler(res, err)
     }
 })
 
@@ -133,7 +127,7 @@ router.patch('/pokemon/:id', isIdDigit, async (req, res) => {
             errMsg: "Pokemon not found"
         })
     } catch (err) {
-        res.status(400).json(`Error while patching pokemon: ${err}`)
+        return errorHandler(res, err)
     }
 })
 
@@ -152,7 +146,7 @@ router.delete('/pokemon/:id', isIdDigit, async (req, res) => {
             errMsg: "Pokemon not found"
         })
     } catch (err) {
-        res.status(400).json(`Error while deleting pokemon: ${err}`)
+        return errorHandler(res, err)
     }
 })
 
@@ -164,13 +158,13 @@ router.get('/pokemonImage/:id', isIdDigit, async (req, res) => {
         if (pokemon) {
             newId = ("0".repeat(3 - req.params.id.length)) + req.params.id
             res.status(200).json({
-                url: `https://github.com/fanzeyi/pokemon.json/blob/master/images/${newId}.png`
+                url: `https://raw.githubusercontent.com/fanzeyi/pokemon.json/master/images/${newId}.png`
             })
         } else res.status(404).json({
             errMsg: "Pokemon not found"
         })
     } catch (err) {
-        res.status(400).json(`Error while finding pokemon with id ${req.params.id}: ${err}`)
+        return errorHandler(res, err)
     }
 })
 
