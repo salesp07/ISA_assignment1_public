@@ -12,6 +12,10 @@ app.use(cors());
 // Use Router
 app.use('/api/v1', api_v1)
 
+app.get('/api/doc', (req, res)=>{
+  res.sendFile(__dirname + '/html/index.html')
+})
+
 app.get('*', (req, res)=>{
   res.status(404).json({msg: 'Improper route. Check API docs plz.'})
 })

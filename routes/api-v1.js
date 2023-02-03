@@ -51,9 +51,9 @@ router.get('/pokemons', async (req, res) => {
     const after = req.query.after;
     try {
         let pokemons = await Pokemon.find().skip(after).limit(count);
-        if (pokemons) res.status(200).json(pokemons)
+        if (pokemons && pokemons.length > 0) res.status(200).json(pokemons)
         else res.status(404).json({
-            errMsg: "Pokemon not found"
+            errMsg: "No Pokemons found"
         })
     } catch (err) {
         return errorHandler(res, err)
